@@ -13,8 +13,27 @@ import { createPinia } from 'pinia'
 export default defineStore((/* { ssrContext } */) => {
   const pinia = createPinia()
 
-  // You can add Pinia plugins here
-  // pinia.use(SomePiniaPlugin)
+  // Persistencia simple en localStorage por store
+  const persistPlugin = ({ store }) => {
+    const storageKey = `mcpcrm-${store.$id}`
+    try {
+      const fromStorage = localStorage.getItem(storageKey)
+      if (fromStorage) {
+        store.$patch(JSON.parse(fromStorage))
+      }
+    } catch {
+      // ignore
+    }
+    store.$subscribe((_, state) => {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(state))
+      } catch {
+        // ignore
+      }
+    }, { detached: true })
+  }
+
+  pinia.use(persistPlugin)
 
   return pinia
 })

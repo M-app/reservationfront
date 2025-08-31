@@ -2,19 +2,53 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
+        <q-btn flat dense round icon="menu" aria-label="Menu" @click="leftDrawerOpen = !leftDrawerOpen" />
 
-        <q-toolbar-title> Quasar App </q-toolbar-title>
+        <q-toolbar-title> Restaurante CRM </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <div class="text-caption">Quasar v{{ $q.version }}</div>
       </q-toolbar>
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list>
-        <q-item-label header> Essential Links </q-item-label>
-
-        <EssentialLink v-for="link in linksList" :key="link.title" v-bind="link" />
+      <q-list padding>
+        <q-item clickable v-ripple to="/calendar" exact>
+          <q-item-section avatar><q-icon name="event" /></q-item-section>
+          <q-item-section>Calendario</q-item-section>
+        </q-item>
+        <q-item clickable v-ripple to="/tables">
+          <q-item-section avatar><q-icon name="table_restaurant" /></q-item-section>
+          <q-item-section>Mesas</q-item-section>
+        </q-item>
+        <q-item clickable v-ripple to="/floor-plan">
+          <q-item-section avatar><q-icon name="grid_4x4" /></q-item-section>
+          <q-item-section>Plano</q-item-section>
+        </q-item>
+        <q-item clickable v-ripple to="/customers">
+          <q-item-section avatar><q-icon name="people" /></q-item-section>
+          <q-item-section>Clientes</q-item-section>
+        </q-item>
+        <q-item clickable v-ripple to="/reservations">
+          <q-item-section avatar><q-icon name="book_online" /></q-item-section>
+          <q-item-section>Reservas</q-item-section>
+        </q-item>
+        <q-item clickable v-ripple to="/waitlist">
+          <q-item-section avatar><q-icon name="queue" /></q-item-section>
+          <q-item-section>Lista de espera</q-item-section>
+        </q-item>
+        <q-item clickable v-ripple to="/communications">
+          <q-item-section avatar><q-icon name="sms" /></q-item-section>
+          <q-item-section>Comunicaciones</q-item-section>
+        </q-item>
+        <q-item clickable v-ripple to="/reports">
+          <q-item-section avatar><q-icon name="insights" /></q-item-section>
+          <q-item-section>Reportes</q-item-section>
+        </q-item>
+        <q-separator spaced />
+        <q-item clickable v-ripple to="/settings">
+          <q-item-section avatar><q-icon name="settings" /></q-item-section>
+          <q-item-section>Configuración</q-item-section>
+        </q-item>
       </q-list>
     </q-drawer>
 
@@ -26,56 +60,6 @@
 
 <script setup>
 import { ref } from 'vue'
-import EssentialLink from 'components/EssentialLink.vue'
-
-const linksList = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev',
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework',
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev',
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev',
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev',
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev',
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev',
-  },
-]
 
 const leftDrawerOpen = ref(false)
-
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value
-}
 </script>
