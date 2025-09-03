@@ -10,7 +10,7 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
+    <q-drawer v-model="leftDrawerOpen" bordered>
       <q-list padding>
         <q-item clickable v-ripple to="/calendar" exact>
           <q-item-section avatar><q-icon name="event" /></q-item-section>

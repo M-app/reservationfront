@@ -21,6 +21,17 @@ export const useFloorPlanStore = defineStore('floorPlan', {
         const { data } = await api.get('/floor-positions')
         // API devuelve por table_id; normalizamos a { id, x, y, ... }
         this.tablesLayout = data.map((r) => ({ id: r.table_id, x: r.x, y: r.y, shape: (r.meta && JSON.parse(r.meta)?.shape) || 'square' }))
+        const boxesRes = await api.get('/floor-boxes')
+        this.boxes = boxesRes.data.map((b) => ({
+          id: b.id,
+          x: b.x,
+          y: b.y,
+          width: b.width,
+          height: b.height,
+          label: b.label || '',
+          color: b.color || '#E4B860',
+          ...(b.meta ? JSON.parse(b.meta) : {}),
+        }))
       } catch (err) {
         this.error = err?.message || 'Error al cargar plano'
       } finally {
@@ -43,15 +54,22 @@ export const useFloorPlanStore = defineStore('floorPlan', {
       const next = (nums.length ? Math.max(...nums) : 0) + 1
       return `B${next}`
     },
-    addBox(box) {
+    async addBox(box) {
       const id = box.id || this.generateBoxId()
-      this.boxes.push({ id, x: 100, y: 100, width: 420, height: 140, label: 'Nuevo', color: '#E4B860', ...box })
+      const newBox = { id, x: 100, y: 100, width: 420, height: 140, label: 'Nuevo', color: '#E4B860', ...box }
+      await api.post('/floor-boxes', newBox)
+      this.boxes.push(newBox)
     },
-    updateBox(id, patch) {
+    async updateBox(id, patch) {
       const idx = this.boxes.findIndex((b) => b.id === id)
-      if (idx !== -1) this.boxes[idx] = { ...this.boxes[idx], ...patch }
+      if (idx !== -1) {
+        const updated = { ...this.boxes[idx], ...patch }
+        await api.post('/floor-boxes', updated)
+        this.boxes[idx] = updated
+      }
     },
-    removeBox(id) {
+    async removeBox(id) {
+      await api.delete(`/floor-boxes/${id}`)
       this.boxes = this.boxes.filter((b) => b.id !== id)
     },
   },
