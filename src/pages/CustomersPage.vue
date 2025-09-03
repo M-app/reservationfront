@@ -1,25 +1,25 @@
 <template>
   <q-page class="q-pa-md">
     <div class="row items-center q-mb-md">
-      <div class="text-h6">Clientes</div>
+      <div class="text-h6">{{ $t('menu.customers') }}</div>
       <q-space />
-      <q-btn color="primary" label="Nuevo cliente" @click="openDialog()" />
+      <q-btn color="primary" :label="$t('customers.new')" @click="openDialog()" />
     </div>
 
     <q-table :rows="customers" :columns="columns" row-key="id" flat bordered :pagination="{ rowsPerPage: 10 }" />
 
     <q-dialog v-model="dialogOpen">
       <q-card style="min-width: 420px">
-        <q-card-section class="text-h6">Ficha de cliente</q-card-section>
+        <q-card-section class="text-h6">{{ $t('customers.sheet') }}</q-card-section>
         <q-card-section class="q-gutter-md">
           <q-input v-model="form.id" label="ID" dense outlined />
-          <q-input v-model="form.name" label="Nombre" dense outlined />
-          <q-input v-model="form.phone" label="Teléfono" dense outlined />
-          <q-input v-model="form.notes" type="textarea" label="Preferencias / Notas" dense outlined autogrow />
+          <q-input v-model="form.name" :label="$t('customers.name')" dense outlined />
+          <q-input v-model="form.phone" :label="$t('customers.phone')" dense outlined />
+          <q-input v-model="form.notes" type="textarea" :label="$t('customers.notes')" dense outlined autogrow />
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat label="Cancelar" v-close-popup />
-          <q-btn color="primary" label="Guardar" @click="save" />
+          <q-btn flat :label="$t('app.cancel')" v-close-popup />
+          <q-btn color="primary" :label="$t('app.save')" @click="save" />
         </q-card-actions>
       </q-card>
     </q-dialog>

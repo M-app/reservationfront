@@ -1,9 +1,9 @@
 <template>
   <q-page class="q-pa-md">
     <div class="row items-center q-mb-md">
-      <div class="text-h6">Mesas</div>
+      <div class="text-h6">{{ $t('menu.tables') }}</div>
       <q-space />
-      <q-btn color="primary" label="Añadir mesa" @click="openDialog()" />
+      <q-btn color="primary" :label="$t('tables.add')" @click="openDialog()" />
     </div>
 
     <q-table :rows="tables" :columns="columns" row-key="id" flat bordered :pagination="{ rowsPerPage: 10 }">
@@ -19,14 +19,14 @@
 
     <q-dialog v-model="dialogOpen">
       <q-card style="min-width: 380px">
-        <q-card-section class="text-h6">Nueva mesa</q-card-section>
+        <q-card-section class="text-h6">{{ $t('tables.new') }}</q-card-section>
         <q-card-section class="q-gutter-md">
-          <q-input v-model="form.name" label="Nombre" dense outlined />
-          <q-input v-model.number="form.capacity" type="number" label="Capacidad" dense outlined />
+          <q-input v-model="form.name" :label="$t('tables.name')" dense outlined />
+          <q-input v-model.number="form.capacity" type="number" :label="$t('tables.capacity')" dense outlined />
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat label="Cancelar" v-close-popup />
-          <q-btn color="primary" label="Guardar" @click="save" :loading="saving" />
+          <q-btn flat :label="$t('app.cancel')" v-close-popup />
+          <q-btn color="primary" :label="$t('app.save')" @click="save" :loading="saving" />
         </q-card-actions>
       </q-card>
     </q-dialog>

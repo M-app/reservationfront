@@ -1,26 +1,26 @@
 <template>
   <q-page class="q-pa-md">
     <div class="row items-center q-mb-md">
-      <div class="text-h6">Reservas</div>
+      <div class="text-h6">{{ $t('menu.reservations') }}</div>
       <q-space />
-      <q-input v-model="rangeStart" type="date" label="Desde" dense outlined class="q-mr-sm" />
-      <q-input v-model="rangeEnd" type="date" label="Hasta" dense outlined class="q-mr-sm" />
+      <q-input v-model="rangeStart" type="date" :label="$t('reservations.from')" dense outlined class="q-mr-sm" />
+      <q-input v-model="rangeEnd" type="date" :label="$t('reservations.to')" dense outlined class="q-mr-sm" />
       <q-btn dense flat icon="refresh" @click="reloadRange" />
       <q-btn color="secondary" class="q-ml-sm" :label="agentActive ? 'Finalizar agente' : 'Hablar con agente'" @click="agentActive ? finalizarConversacion() : iniciarConversacion()" :loading="connectingAgent" />
-      <q-btn color="primary" class="q-ml-sm" label="Nueva reserva" @click="openDialog" />
+      <q-btn color="primary" class="q-ml-sm" :label="$t('reservations.new')" @click="openDialog" />
     </div>
     <q-table :rows="rows" :columns="columns" row-key="id" flat bordered :pagination="{ rowsPerPage: 10 }" />
 
     <q-dialog v-model="dialog.open">
       <q-card style="min-width: 520px; max-width: 680px">
-        <q-card-section class="text-h6">Nueva reserva</q-card-section>
+        <q-card-section class="text-h6">{{ $t('reservations.new') }}</q-card-section>
         <q-card-section>
           <div class="row q-col-gutter-md">
             <div class="col-12 col-sm-6">
-              <q-input v-model="dialog.form.date" type="date" label="Fecha" dense outlined />
+              <q-input v-model="dialog.form.date" type="date" :label="$t('reservations.date')" dense outlined />
             </div>
             <div class="col-12 col-sm-6">
-              <q-input v-model="dialog.form.time" label="Hora" dense outlined readonly>
+              <q-input v-model="dialog.form.time" :label="$t('reservations.time')" dense outlined readonly>
                 <template #append>
                   <q-icon name="access_time" class="cursor-pointer" />
                 </template>
@@ -30,10 +30,10 @@
               </q-input>
             </div>
             <div class="col-12 col-sm-6">
-              <q-select v-model="dialog.form.tableId" :options="tableOptions" label="Mesa" dense outlined emit-value map-options />
+              <q-select v-model="dialog.form.tableId" :options="tableOptions" :label="$t('reservations.table')" dense outlined emit-value map-options />
             </div>
             <div class="col-12 col-sm-6">
-              <q-input v-model.number="dialog.form.partySize" type="number" label="Comensales" dense outlined />
+              <q-input v-model.number="dialog.form.partySize" type="number" :label="$t('reservations.party')" dense outlined />
             </div>
           </div>
 
@@ -41,29 +41,29 @@
 
           <div class="row q-col-gutter-md">
             <div class="col-12">
-              <q-toggle v-model="dialog.useExistingCustomer" label="Seleccionar cliente existente" />
+              <q-toggle v-model="dialog.useExistingCustomer" :label="$t('reservations.existingCustomer')" />
             </div>
             <div class="col-12" v-if="dialog.useExistingCustomer">
-              <q-select v-model="dialog.form.customerId" :options="customerOptions" label="Cliente" dense outlined emit-value map-options use-input fill-input input-debounce="0" />
+              <q-select v-model="dialog.form.customerId" :options="customerOptions" :label="$t('reservations.customer')" dense outlined emit-value map-options use-input fill-input input-debounce="0" />
             </div>
             <template v-else>
               <div class="col-12 col-sm-6">
-                <q-input v-model="dialog.form.name" label="Nombre" dense outlined />
+                <q-input v-model="dialog.form.name" :label="$t('customers.name')" dense outlined />
               </div>
               <div class="col-12 col-sm-6">
-                <q-input v-model="dialog.form.phone" label="Teléfono" dense outlined />
+                <q-input v-model="dialog.form.phone" :label="$t('customers.phone')" dense outlined />
               </div>
               <div class="col-12">
-                <q-input v-model="dialog.form.notes" type="textarea" label="Notas / Preferencias" dense outlined autogrow />
+                <q-input v-model="dialog.form.notes" type="textarea" :label="$t('customers.notes')" dense outlined autogrow />
               </div>
             </template>
           </div>
 
-          <div v-if="conflict" class="text-negative q-mt-sm">La mesa seleccionada ya está ocupada en esa fecha y hora.</div>
+          <div v-if="conflict" class="text-negative q-mt-sm">{{ $t('reservations.conflict') }}</div>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat label="Cancelar" v-close-popup />
-          <q-btn color="primary" label="Guardar" :disable="!canSave || conflict" @click="save" :loading="saving" />
+          <q-btn flat :label="$t('app.cancel')" v-close-popup />
+          <q-btn color="primary" :label="$t('app.save')" :disable="!canSave || conflict" @click="save" :loading="saving" />
         </q-card-actions>
       </q-card>
     </q-dialog>
