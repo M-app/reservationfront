@@ -13,6 +13,7 @@ const routes = [
       { path: 'communications', component: () => import('pages/CommunicationsPage.vue') },
       { path: 'settings', component: () => import('pages/SettingsPage.vue') },
       { path: 'reports', component: () => import('pages/ReportsPage.vue') },
+      { path: 'zolmi', component: () => import('pages/ZolmiPage.vue') },
     ],
   },
 
