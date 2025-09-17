@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useAgentsStore } from 'src/stores/agents-store'
 
 const agents = useAgentsStore()
@@ -44,6 +44,13 @@ async function onStop() { await agents.stopAgent() }
 
 onMounted(() => {
   // Asegura estado limpio si quedó persistido activo
+  if (agents.active || agents.connecting || agents.session) {
+    agents.stopAgent()
+  }
+})
+
+onBeforeUnmount(() => {
+  // Cierra sesión si el usuario navega fuera de la página
   if (agents.active || agents.connecting || agents.session) {
     agents.stopAgent()
   }
