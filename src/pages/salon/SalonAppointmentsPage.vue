@@ -64,6 +64,8 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <elevenlabs-convai agent-id="agent_9101k5y95kc7eh5bhkbj2tb2kdfn"></elevenlabs-convai>
   </q-page>
 </template>
 
@@ -212,6 +214,7 @@ async function onCancel(row) {
 let channel
 
 onMounted(async () => {
+  ensureConvaiScript()
   await fetchAll()
   channel = supabase
     .channel('rt-appointments')
@@ -239,4 +242,14 @@ onBeforeUnmount(() => {
     console.debug('supabase channel cleanup failed', err)
   }
 })
+
+function ensureConvaiScript() {
+  if (document.querySelector('script[data-elevenlabs-convai]')) return
+  const s = document.createElement('script')
+  s.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed'
+  s.async = true
+  s.type = 'text/javascript'
+  s.setAttribute('data-elevenlabs-convai', '1')
+  document.head.appendChild(s)
+}
 </script>
