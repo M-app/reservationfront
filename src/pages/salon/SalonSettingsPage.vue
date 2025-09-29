@@ -1,11 +1,17 @@
 <template>
   <q-page padding class="q-gutter-md">
     <div class="text-h6">Configuración del salón</div>
-    <div class="text-caption text-grey-7">Horario de atención y zona horaria</div>
+    <div class="text-caption text-grey-7">Idioma, horario y zona horaria</div>
 
     <q-card flat bordered class="bg-white">
       <q-card-section class="q-gutter-md">
         <div class="row q-col-gutter-md items-end">
+          <div class="col-12 col-sm-6 col-md-4">
+            <q-select v-model="language" :options="languageOptions" label="Idioma" dense outlined emit-value map-options/>
+          </div>
+          <div class="col-auto">
+            <q-btn color="primary" label="Guardar idioma" :loading="savingLang" @click="saveLanguage" />
+          </div>
           <div class="col-12 col-sm-6 col-md-4">
             <q-select v-model="timezone" :options="timezoneOptions" label="Zona horaria" dense outlined emit-value map-options/>
           </div>
@@ -51,6 +57,7 @@ import { api } from 'boot/axios'
 
 const savingKey = ref(null)
 const savingTz = ref(false)
+const savingLang = ref(false)
 
 const timezone = ref('UTC')
 const timezoneOptions = [
@@ -60,6 +67,12 @@ const timezoneOptions = [
   { label: 'America/Lima', value: 'America/Lima' },
   { label: 'America/Santiago', value: 'America/Santiago' },
   { label: 'Europe/Madrid', value: 'Europe/Madrid' }
+]
+
+const language = ref('es')
+const languageOptions = [
+  { label: 'Español', value: 'es' },
+  { label: 'Català', value: 'ca' }
 ]
 
 const days = ref([
@@ -73,9 +86,10 @@ const days = ref([
 ])
 
 async function load() {
-  const [bh, tz] = await Promise.all([
+  const [bh, tz, lang] = await Promise.all([
     api.get('/settings/business-hours'),
-    api.get('/settings/timezone')
+    api.get('/settings/timezone'),
+    api.get('/settings/language')
   ])
   for (const rec of bh.data) {
     const d = days.value.find(x => x.value === rec.day_of_week)
@@ -86,6 +100,7 @@ async function load() {
     }
   }
   timezone.value = tz.data.timezone || 'UTC'
+  language.value = lang.data.language || 'es'
 }
 
 async function saveDay(d) {
@@ -105,6 +120,13 @@ async function saveTimezone() {
   try {
     await api.put('/settings/timezone', { timezone: timezone.value })
   } finally { savingTz.value = false }
+}
+
+async function saveLanguage() {
+  savingLang.value = true
+  try {
+    await api.put('/settings/language', { language: language.value })
+  } finally { savingLang.value = false }
 }
 
 onMounted(load)

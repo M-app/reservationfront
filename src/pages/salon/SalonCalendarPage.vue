@@ -27,7 +27,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-    <elevenlabs-convai agent-id="agent_9101k5y95kc7eh5bhkbj2tb2kdfn"></elevenlabs-convai>
+    <elevenlabs-convai :agent-id="convaiAgentId"></elevenlabs-convai>
   </q-page>
 </template>
 
@@ -51,6 +51,8 @@ const events = ref([])
 const businessHours = ref([])
 const servicesById = ref({})
 const clientsById = ref({})
+const language = ref('es')
+const convaiAgentId = ref('agent_9101k5y95kc7eh5bhkbj2tb2kdfn')
 
 const showDialog = ref(false)
 const dialogData = ref({ id: '', serviceName: '', clientName: '', start: '', end: '', status: '' })
@@ -146,14 +148,17 @@ function onDatesSet(arg) {
 }
 
 async function load() {
-  const [tzResp, appts, services, clients, hoursResp] = await Promise.all([
+  const [tzResp, appts, services, clients, hoursResp, langResp] = await Promise.all([
     api.get('/settings/timezone'),
     api.get('/appointments'),
     api.get('/services'),
     api.get('/clients'),
-    api.get('/settings/business-hours')
+    api.get('/settings/business-hours'),
+    api.get('/settings/language')
   ])
   salonTz.value = tzResp.data.timezone || 'UTC'
+  language.value = (langResp.data.language || 'es')
+  convaiAgentId.value = language.value === 'ca' ? 'agent_1201k67488tff5097p5j68anaz7b' : 'agent_9101k5y95kc7eh5bhkbj2tb2kdfn'
 
   const servicesMap = Object.fromEntries(services.data.map(s => [s.id, s.name]))
   const clientsMap = Object.fromEntries(clients.data.map(c => [c.id, `${c.first_name} ${c.last_name}`]))

@@ -34,11 +34,15 @@
           <div class="text-h6">{{ form.id ? 'Editar' : 'Nueva' }} cita</div>
         </q-card-section>
         <q-card-section class="q-gutter-md">
-          <div class="row q-col-gutter-md">
+          <div class="row q-col-gutter-md items-end">
             <div class="col-12 col-sm-4">
               <q-select use-input fill-input hide-selected emit-value map-options
                         v-model="form.client_id" :options="clientsOpts" option-value="id" option-label="label"
                         label="Cliente" dense outlined @filter="filterClients" />
+            </div>
+            <div class="col-auto">
+              <q-btn flat color="primary" label="Nuevo cliente" v-if="!newClientMode" @click="toggleNewClient(true)" />
+              <q-btn flat color="negative" label="Cancelar" v-else @click="toggleNewClient(false)" />
             </div>
             <div class="col-12 col-sm-4">
               <q-select use-input fill-input hide-selected emit-value map-options
@@ -47,6 +51,18 @@
             </div>
             <div class="col-12 col-sm-4">
               <q-input v-model="dateStr" type="date" label="Fecha" dense outlined />
+            </div>
+          </div>
+          <q-separator spaced v-if="newClientMode" />
+          <div class="row q-col-gutter-lg q-mt-sm" v-if="newClientMode">
+            <div class="col-12 col-sm-4">
+              <q-input v-model="newClient.first_name" label="Nombre" dense outlined />
+            </div>
+            <div class="col-12 col-sm-4">
+              <q-input v-model="newClient.last_name" label="Apellido" dense outlined />
+            </div>
+            <div class="col-12 col-sm-4">
+              <q-input v-model="newClient.phone_number" label="Teléfono" dense outlined />
             </div>
           </div>
           <div class="row q-col-gutter-md">
@@ -65,7 +81,7 @@
       </q-card>
     </q-dialog>
 
-    <elevenlabs-convai agent-id="agent_9101k5y95kc7eh5bhkbj2tb2kdfn"></elevenlabs-convai>
+    <elevenlabs-convai :agent-id="convaiAgentId"></elevenlabs-convai>
   </q-page>
 </template>
 
@@ -80,6 +96,8 @@ const loading = ref(false)
 const saving = ref(false)
 const rows = ref([])
 const salonTz = ref('UTC')
+const language = ref('es')
+const convaiAgentId = ref('agent_9101k5y95kc7eh5bhkbj2tb2kdfn')
 
 const columns = [
   { name: 'id', label: 'ID', field: 'id', align: 'left', sortable: true },
@@ -101,6 +119,20 @@ const servicesOpts = ref([])
 
 const clientsMap = ref({})
 const servicesMap = ref({})
+
+const NEW_CLIENT_ID = -1
+const newClientMode = ref(false)
+const newClient = ref({ first_name: '', last_name: '', phone_number: '' })
+
+function toggleNewClient(on) {
+  newClientMode.value = !!on
+  if (newClientMode.value) {
+    form.value.client_id = NEW_CLIENT_ID
+  } else {
+    if (form.value.client_id === NEW_CLIENT_ID) form.value.client_id = null
+    newClient.value = { first_name: '', last_name: '', phone_number: '' }
+  }
+}
 
 const computedIso = computed(() => {
   if (!dateStr.value || !timeStr.value) return ''
@@ -151,16 +183,22 @@ function openForm(row) {
 async function fetchAll() {
   loading.value = true
   try {
-    const [appts, clients, services, tzResp] = await Promise.all([
+    const [appts, clients, services, tzResp, langResp] = await Promise.all([
       api.get('/appointments'),
       api.get('/clients'),
       api.get('/services'),
-      api.get('/settings/timezone')
+      api.get('/settings/timezone'),
+      api.get('/settings/language')
     ])
     rows.value = appts.data
     salonTz.value = tzResp.data.timezone || 'UTC'
+    language.value = (langResp.data.language || 'es')
+    convaiAgentId.value = language.value === 'ca' ? 'agent_1201k67488tff5097p5j68anaz7b' : 'agent_9101k5y95kc7eh5bhkbj2tb2kdfn'
 
-    clientsOpts.value = clients.data.map(c => ({ id: c.id, label: `${c.first_name} ${c.last_name}` }))
+    clientsOpts.value = [
+      ...clients.data.map(c => ({ id: c.id, label: `${c.first_name} ${c.last_name}` })),
+      { id: NEW_CLIENT_ID, label: 'Nuevo cliente…' }
+    ]
     servicesOpts.value = services.data.map(s => ({ id: s.id, label: `${s.name} (${s.duration_minutes}m)` }))
 
     clientsMap.value = Object.fromEntries(clients.data.map(c => [c.id, `${c.first_name} ${c.last_name}`]))
@@ -195,8 +233,20 @@ async function onSave() {
         start_time: startIso
       })
     } else {
+      let clientId = form.value.client_id
+      if (clientId === NEW_CLIENT_ID) {
+        // Validación mínima
+        const fn = (newClient.value.first_name || '').trim()
+        const ln = (newClient.value.last_name || '').trim()
+        const ph = (newClient.value.phone_number || '').trim()
+        if (!fn || !ln) {
+          throw new Error('Nombre y apellido son requeridos para nuevo cliente')
+        }
+        const created = await api.post('/clients', { first_name: fn, last_name: ln, phone_number: ph })
+        clientId = created.data.id
+      }
       await api.post('/appointments', {
-        client_id: form.value.client_id,
+        client_id: clientId,
         service_id: form.value.service_id,
         start_time: startIso
       })
